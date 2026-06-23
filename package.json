@@ -1,0 +1,40 @@
+{
+  "name": "ha-camera-live-card",
+  "version": "0.1.0",
+  "description": "A HACS-ready Home Assistant live camera card optimized for go2rtc, WebRTC, and high-resolution streams.",
+  "type": "module",
+  "main": "dist/ha-camera-live-card.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "home-assistant",
+    "hacs",
+    "lovelace",
+    "camera",
+    "go2rtc",
+    "webrtc"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "lit": "^3.2.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@types/node": "^22.10.7",
+    "eslint": "^9.18.0",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0",
+    "vite": "^6.0.7",
+    "vitest": "^2.1.8"
+  }
+}
