@@ -36,6 +36,7 @@ source:
   type: go2rtc
   stream: driveway
   url: /api/go2rtc
+  mode: auto
 fallbacks:
   - type: entity
     entity: camera.driveway
@@ -85,6 +86,7 @@ controls: native
 ## 2K and 4K tips
 
 - Prefer go2rtc/WebRTC for the lowest latency and smoothest live view.
+- Leave go2rtc `mode` on `auto` unless you need to force `webrtc`, `mse`, or `hls`.
 - Use camera substreams or profiles for wall tablets and slower clients.
 - Keep `pause_when_hidden: true` when you place many camera cards on one dashboard.
 - Keep `muted: true` if you want autoplay.

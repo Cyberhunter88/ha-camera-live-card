@@ -3,10 +3,10 @@
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const R = globalThis, L = R.ShadowRoot && (R.ShadyCSS === void 0 || R.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, z = Symbol(), q = /* @__PURE__ */ new WeakMap();
+const R = globalThis, L = R.ShadowRoot && (R.ShadyCSS === void 0 || R.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, j = Symbol(), q = /* @__PURE__ */ new WeakMap();
 let it = class {
   constructor(t, e, s) {
-    if (this._$cssResult$ = !0, s !== z) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
+    if (this._$cssResult$ = !0, s !== j) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
     this.cssText = t, this.t = e;
   }
   get styleSheet() {
@@ -22,13 +22,13 @@ let it = class {
     return this.cssText;
   }
 };
-const ht = (i) => new it(typeof i == "string" ? i : i + "", void 0, z), lt = (i, ...t) => {
+const ht = (i) => new it(typeof i == "string" ? i : i + "", void 0, j), lt = (i, ...t) => {
   const e = i.length === 1 ? i[0] : t.reduce((s, r, n) => s + ((o) => {
     if (o._$cssResult$ === !0) return o.cssText;
     if (typeof o == "number") return o;
     throw Error("Value passed to 'css' function must be a 'css' function result: " + o + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
   })(r) + i[n + 1], i[0]);
-  return new it(e, i, z);
+  return new it(e, i, j);
 }, ut = (i, t) => {
   if (L) i.adoptedStyleSheets = t.map((e) => e instanceof CSSStyleSheet ? e : e.styleSheet);
   else for (const e of t) {
@@ -45,7 +45,7 @@ const ht = (i) => new it(typeof i == "string" ? i : i + "", void 0, z), lt = (i,
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: dt, defineProperty: pt, getOwnPropertyDescriptor: ft, getOwnPropertyNames: mt, getOwnPropertySymbols: _t, getPrototypeOf: $t } = Object, U = globalThis, F = U.trustedTypes, gt = F ? F.emptyScript : "", yt = U.reactiveElementPolyfillSupport, E = (i, t) => i, I = { toAttribute(i, t) {
+const { is: dt, defineProperty: pt, getOwnPropertyDescriptor: ft, getOwnPropertyNames: mt, getOwnPropertySymbols: _t, getPrototypeOf: $t } = Object, H = globalThis, F = H.trustedTypes, gt = F ? F.emptyScript : "", yt = H.reactiveElementPolyfillSupport, E = (i, t) => i, I = { toAttribute(i, t) {
   switch (t) {
     case Boolean:
       i = i ? gt : null;
@@ -74,7 +74,7 @@ const { is: dt, defineProperty: pt, getOwnPropertyDescriptor: ft, getOwnProperty
   }
   return e;
 } }, rt = (i, t) => !dt(i, t), Z = { attribute: !0, type: String, converter: I, reflect: !1, useDefault: !1, hasChanged: rt };
-Symbol.metadata ??= Symbol("metadata"), U.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
+Symbol.metadata ??= Symbol("metadata"), H.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
 let v = class extends HTMLElement {
   static addInitializer(t) {
     this._$Ei(), (this.l ??= []).push(t);
@@ -256,13 +256,13 @@ let v = class extends HTMLElement {
   firstUpdated(t) {
   }
 };
-v.elementStyles = [], v.shadowRootOptions = { mode: "open" }, v[E("elementProperties")] = /* @__PURE__ */ new Map(), v[E("finalized")] = /* @__PURE__ */ new Map(), yt?.({ ReactiveElement: v }), (U.reactiveElementVersions ??= []).push("2.1.2");
+v.elementStyles = [], v.shadowRootOptions = { mode: "open" }, v[E("elementProperties")] = /* @__PURE__ */ new Map(), v[E("finalized")] = /* @__PURE__ */ new Map(), yt?.({ ReactiveElement: v }), (H.reactiveElementVersions ??= []).push("2.1.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const j = globalThis, G = (i) => i, T = j.trustedTypes, J = T ? T.createPolicy("lit-html", { createHTML: (i) => i }) : void 0, nt = "$lit$", m = `lit$${Math.random().toFixed(9).slice(2)}$`, ot = "?" + m, vt = `<${ot}>`, g = document, C = () => g.createComment(""), x = (i) => i === null || typeof i != "object" && typeof i != "function", V = Array.isArray, bt = (i) => V(i) || typeof i?.[Symbol.iterator] == "function", M = `[ 	
+const z = globalThis, G = (i) => i, T = z.trustedTypes, J = T ? T.createPolicy("lit-html", { createHTML: (i) => i }) : void 0, nt = "$lit$", m = `lit$${Math.random().toFixed(9).slice(2)}$`, ot = "?" + m, vt = `<${ot}>`, g = document, C = () => g.createComment(""), x = (i) => i === null || typeof i != "object" && typeof i != "function", V = Array.isArray, bt = (i) => V(i) || typeof i?.[Symbol.iterator] == "function", M = `[ 	
 \f\r]`, A = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, K = /-->/g, Y = />/g, _ = RegExp(`>|${M}(?:([^\\s"'>=/]+)(${M}*=${M}*(?:[^ 	
 \f\r"'\`<>=]|("|')|))|$)`, "g"), Q = /'/g, X = /"/g, at = /^(?:script|style|textarea|title)$/i, wt = (i) => (t, ...e) => ({ _$litType$: i, strings: t, values: e }), y = wt(1), b = Symbol.for("lit-noChange"), l = Symbol.for("lit-nothing"), tt = /* @__PURE__ */ new WeakMap(), $ = g.createTreeWalker(g, 129);
 function ct(i, t) {
@@ -295,7 +295,7 @@ class k {
       if (r.nodeType === 1) {
         if (r.hasAttributes()) for (const h of r.getAttributeNames()) if (h.endsWith(nt)) {
           const p = d[o++], f = r.getAttribute(h).split(m), O = /([.?@])?(.*)/.exec(p);
-          a.push({ type: 1, index: n, name: O[2], strings: f, ctor: O[1] === "." ? St : O[1] === "?" ? Ct : O[1] === "@" ? xt : H }), r.removeAttribute(h);
+          a.push({ type: 1, index: n, name: O[2], strings: f, ctor: O[1] === "." ? St : O[1] === "?" ? Ct : O[1] === "@" ? xt : U }), r.removeAttribute(h);
         } else h.startsWith(m) && (a.push({ type: 6, index: n }), r.removeAttribute(h));
         if (at.test(r.tagName)) {
           const h = r.textContent.split(m), p = h.length - 1;
@@ -411,7 +411,7 @@ class P {
     this._$AM === void 0 && (this._$Cv = t, this._$AP?.(t));
   }
 }
-class H {
+class U {
   get tagName() {
     return this.element.tagName;
   }
@@ -436,7 +436,7 @@ class H {
     t === l ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, t ?? "");
   }
 }
-class St extends H {
+class St extends U {
   constructor() {
     super(...arguments), this.type = 3;
   }
@@ -444,7 +444,7 @@ class St extends H {
     this.element[this.name] = t === l ? void 0 : t;
   }
 }
-class Ct extends H {
+class Ct extends U {
   constructor() {
     super(...arguments), this.type = 4;
   }
@@ -452,7 +452,7 @@ class Ct extends H {
     this.element.toggleAttribute(this.name, !!t && t !== l);
   }
 }
-class xt extends H {
+class xt extends U {
   constructor(t, e, s, r, n) {
     super(t, e, s, r, n), this.type = 5;
   }
@@ -476,8 +476,8 @@ class kt {
     w(this, t);
   }
 }
-const Pt = j.litHtmlPolyfillSupport;
-Pt?.(k, P), (j.litHtmlVersions ??= []).push("3.3.3");
+const Pt = z.litHtmlPolyfillSupport;
+Pt?.(k, P), (z.litHtmlVersions ??= []).push("3.3.3");
 const Ot = (i, t, e) => {
   const s = e?.renderBefore ?? t;
   let r = s._$litPart$;
@@ -519,14 +519,14 @@ S._$litElement$ = !0, S.finalized = !0, D.litElementHydrateSupport?.({ LitElemen
 const Rt = D.litElementPolyfillSupport;
 Rt?.({ LitElement: S });
 (D.litElementVersions ??= []).push("4.2.2");
-const Tt = ["go2rtc", "entity", "url"], Ut = ["minimal", "native", "none"];
-function Ht(i) {
+const Tt = ["go2rtc", "entity", "url"], Ht = ["minimal", "native", "none"];
+function Ut(i) {
   if (!i || typeof i != "object")
     throw new Error("Card config is required.");
   if (!i.source)
     throw new Error("Camera source is required.");
   const t = et(i.source), e = (i.fallbacks ?? []).map(et), s = i.controls ?? "minimal";
-  if (!Ut.includes(s))
+  if (!Ht.includes(s))
     throw new Error("controls must be one of: minimal, native, none.");
   return {
     type: i.type,
@@ -552,7 +552,7 @@ function et(i) {
       type: "go2rtc",
       stream: i.stream,
       url: It(i.url ?? "/api/go2rtc"),
-      mode: i.mode ?? "webrtc"
+      mode: i.mode ?? "auto"
     };
   }
   if (i.type === "entity") {
@@ -611,6 +611,10 @@ class Lt extends W {
     super(t), this.source = t;
   }
   async connect(t, e) {
+    if (this.source.mode === "auto") {
+      await this.connectAuto(t, e);
+      return;
+    }
     if (this.source.mode === "hls") {
       await this.connectHls(t, e);
       return;
@@ -623,6 +627,17 @@ class Lt extends W {
   }
   disconnect() {
     this.peer && (this.peer.getSenders().forEach((t) => t.track?.stop()), this.peer.getReceivers().forEach((t) => t.track?.stop()), this.peer.close(), this.peer = void 0), this.mark("idle");
+  }
+  async connectAuto(t, e) {
+    const s = [];
+    for (const r of [this.connectWebRtc, this.connectMse, this.connectHls])
+      try {
+        await r.call(this, t, e);
+        return;
+      } catch (n) {
+        s.push(n instanceof Error ? n.message : String(n)), this.disconnect();
+      }
+    throw new Error(`go2rtc auto mode failed: ${s.join(" | ")}`);
   }
   async connectWebRtc(t, e) {
     if (!("RTCPeerConnection" in window))
@@ -659,12 +674,14 @@ class Lt extends W {
         body: t
       }
     );
-    if (!e.ok)
-      throw new Error(`go2rtc WebRTC failed with HTTP ${e.status}.`);
+    if (!e.ok) {
+      const s = await e.text(), r = s.trim() ? `go2rtc WebRTC failed with HTTP ${e.status}: ${s.trim()}` : `go2rtc WebRTC failed with HTTP ${e.status}.`;
+      throw new Error(r);
+    }
     return e.text();
   }
 }
-class zt extends W {
+class jt extends W {
   constructor(t) {
     super(t), this.source = t;
   }
@@ -686,7 +703,7 @@ class zt extends W {
     this.mark("idle");
   }
 }
-class jt extends W {
+class zt extends W {
   constructor(t) {
     super(t), this.source = t;
   }
@@ -698,7 +715,7 @@ class jt extends W {
   }
 }
 function Vt(i) {
-  return i.type === "go2rtc" ? new Lt(i) : i.type === "entity" ? new zt(i) : new jt(i);
+  return i.type === "go2rtc" ? new Lt(i) : i.type === "entity" ? new jt(i) : new zt(i);
 }
 const Dt = "0.1.0";
 let N = 0;
@@ -755,7 +772,7 @@ class qt extends S {
     this._hass = t;
   }
   setConfig(t) {
-    this._config = Ht(t), this._muted = this._config.muted, this._status = "idle", this._error = "", this._activeSource = "", this._manualPaused = !1, this.disconnectProvider(), this.requestUpdate(), this.updateComplete.then(() => this.connectFirstAvailable());
+    this._config = Ut(t), this._muted = this._config.muted, this._status = "idle", this._error = "", this._activeSource = "", this._manualPaused = !1, this.disconnectProvider(), this.requestUpdate(), this.updateComplete.then(() => this.connectFirstAvailable());
   }
   getCardSize() {
     return 4;

@@ -57,7 +57,7 @@ export function normalizeSource(source: CameraSource): CameraSource {
       type: "go2rtc",
       stream: source.stream,
       url: trimTrailingSlash(source.url ?? "/api/go2rtc"),
-      mode: source.mode ?? "webrtc",
+      mode: source.mode ?? "auto",
     };
   }
 

@@ -21,7 +21,7 @@ describe("normalizeConfig", () => {
       type: "go2rtc",
       stream: "driveway",
       url: "/api/go2rtc",
-      mode: "webrtc",
+      mode: "auto",
     });
   });
 

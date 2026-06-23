@@ -6,7 +6,7 @@ export interface Go2RtcSource {
   type: "go2rtc";
   stream: string;
   url?: string;
-  mode?: "webrtc" | "mse" | "hls";
+  mode?: "auto" | "webrtc" | "mse" | "hls";
 }
 
 export interface EntitySource {

@@ -57,6 +57,7 @@ describe("ha-camera-live-card", () => {
       source: {
         type: "go2rtc",
         stream: "front",
+        mode: "webrtc",
       },
       fallbacks: [
         {

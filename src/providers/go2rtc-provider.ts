@@ -13,6 +13,11 @@ export class Go2RtcProvider extends BaseProvider {
   }
 
   async connect(video: HTMLVideoElement, context: StreamContext): Promise<void> {
+    if (this.source.mode === "auto") {
+      await this.connectAuto(video, context);
+      return;
+    }
+
     if (this.source.mode === "hls") {
       await this.connectHls(video, context);
       return;
@@ -35,6 +40,22 @@ export class Go2RtcProvider extends BaseProvider {
     }
 
     this.mark("idle");
+  }
+
+  private async connectAuto(video: HTMLVideoElement, context: StreamContext): Promise<void> {
+    const errors: string[] = [];
+
+    for (const connect of [this.connectWebRtc, this.connectMse, this.connectHls]) {
+      try {
+        await connect.call(this, video, context);
+        return;
+      } catch (error) {
+        errors.push(error instanceof Error ? error.message : String(error));
+        this.disconnect();
+      }
+    }
+
+    throw new Error(`go2rtc auto mode failed: ${errors.join(" | ")}`);
   }
 
   private async connectWebRtc(video: HTMLVideoElement, context: StreamContext): Promise<void> {
@@ -121,7 +142,12 @@ export class Go2RtcProvider extends BaseProvider {
     );
 
     if (!response.ok) {
-      throw new Error(`go2rtc WebRTC failed with HTTP ${response.status}.`);
+      const details = await response.text();
+      const message = details.trim()
+        ? `go2rtc WebRTC failed with HTTP ${response.status}: ${details.trim()}`
+        : `go2rtc WebRTC failed with HTTP ${response.status}.`;
+
+      throw new Error(message);
     }
 
     return response.text();
