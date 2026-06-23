@@ -11,7 +11,7 @@ import type {
   StreamStatus,
 } from "./types";
 
-const CARD_VERSION = "0.1.0";
+const CARD_VERSION = "0.1.1";
 let nextConnectAt = 0;
 
 function reserveConnectSlot(): Promise<void> {

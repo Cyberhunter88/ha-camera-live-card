@@ -717,7 +717,7 @@ class zt extends W {
 function Vt(i) {
   return i.type === "go2rtc" ? new Lt(i) : i.type === "entity" ? new jt(i) : new zt(i);
 }
-const Dt = "0.1.0";
+const Dt = "0.1.1";
 let N = 0;
 function Wt() {
   const i = Date.now(), t = Math.max(0, N - i);

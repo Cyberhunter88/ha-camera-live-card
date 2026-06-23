@@ -1,6 +1,6 @@
 {
   "name": "ha-camera-live-card",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A HACS-ready Home Assistant live camera card optimized for go2rtc, WebRTC, and high-resolution streams.",
   "type": "module",
   "main": "dist/ha-camera-live-card.js",
