@@ -1,6 +1,7 @@
 import { LitElement, css, html, nothing } from "lit";
 import type { TemplateResult } from "lit";
 import { describeSource, normalizeConfig } from "./config";
+import "./ha-camera-live-card-editor";
 import { createProvider } from "./providers/create-provider";
 import type {
   CameraLiveCardConfig,
@@ -34,6 +35,7 @@ export class CameraLiveCard extends LitElement {
     _status: { state: true },
     _error: { state: true },
     _activeSource: { state: true },
+    _cameraIndex: { state: true },
     _sourceIndex: { state: true },
     _muted: { state: true },
     _visible: { state: true },
@@ -46,6 +48,7 @@ export class CameraLiveCard extends LitElement {
   private _status: StreamStatus = "idle";
   private _error = "";
   private _activeSource = "";
+  private _cameraIndex = 0;
   private _sourceIndex = 0;
   private _muted = true;
   private _visible = true;
@@ -62,6 +65,8 @@ export class CameraLiveCard extends LitElement {
     this._status = "idle";
     this._error = "";
     this._activeSource = "";
+    this._cameraIndex = Math.min(this._cameraIndex, this._config.cameras.length - 1);
+    this._sourceIndex = 0;
     this._manualPaused = false;
     this.disconnectProvider();
     this.requestUpdate();
@@ -78,6 +83,26 @@ export class CameraLiveCard extends LitElement {
       columns: 6,
       min_rows: 3,
       min_columns: 3,
+    };
+  }
+
+  static getConfigElement(): HTMLElement {
+    return document.createElement("ha-camera-live-card-editor");
+  }
+
+  static getStubConfig(): Omit<CameraLiveCardConfig, "type"> {
+    return {
+      cameras: [
+        {
+          title: "Camera",
+          source: {
+            type: "entity",
+            entity: "camera.example",
+          },
+        },
+      ],
+      controls: "minimal",
+      pause_when_hidden: true,
     };
   }
 
@@ -126,25 +151,43 @@ export class CameraLiveCard extends LitElement {
             @error=${this.handleVideoError}
           ></video>
 
-          ${this.renderHeader()} ${this.renderStatus()} ${this.renderControls()}
+          ${this.renderHeader()} ${this.renderNavigation()} ${this.renderStatus()} ${this.renderControls()}
         </section>
       </ha-card>
     `;
   }
 
   private renderHeader(): TemplateResult | typeof nothing {
-    if (!this._config?.title) {
+    if (!this._config) {
       return nothing;
     }
 
+    const displayTitle = this._config.title ?? this.currentCamera?.title;
     const entityState = this.getActiveEntityState();
+    const showCameraPill = this._config.cameras.length > 1;
+
+    if (!displayTitle && !showCameraPill && !entityState) {
+      return nothing;
+    }
 
     return html`
       <div class="header">
-        <span class="title">
-          <ha-icon icon="mdi:cctv"></ha-icon>
-          <span>${this._config.title}</span>
-        </span>
+        ${displayTitle
+          ? html`
+              <span class="title">
+                <ha-icon icon="mdi:cctv"></ha-icon>
+                <span>${displayTitle}</span>
+              </span>
+            `
+          : html`<span class="title spacer"></span>`}
+        ${showCameraPill
+          ? html`
+              <span class="camera-pill" title=${this.currentCamera?.title ?? this.cameraPositionLabel}>
+                <ha-icon icon="mdi:camera-switch"></ha-icon>
+                <span>${this.cameraPositionLabel}</span>
+              </span>
+            `
+          : nothing}
         <span class="source-pill">
           <ha-icon icon=${this.sourceIcon(this.currentSource)}></ha-icon>
           <span>${this.sourceLabel(this.currentSource)}</span>
@@ -157,6 +200,23 @@ export class CameraLiveCard extends LitElement {
               </span>
             `
           : nothing}
+      </div>
+    `;
+  }
+
+  private renderNavigation(): TemplateResult | typeof nothing {
+    if (!this._config || this._config.cameras.length < 2) {
+      return nothing;
+    }
+
+    return html`
+      <div class="navigation" aria-label="Camera navigation">
+        <button type="button" class="nav-button previous" title="Previous camera" @click=${this.showPreviousCamera}>
+          <ha-icon icon="mdi:chevron-left"></ha-icon>
+        </button>
+        <button type="button" class="nav-button next" title="Next camera" @click=${this.showNextCamera}>
+          <ha-icon icon="mdi:chevron-right"></ha-icon>
+        </button>
       </div>
     `;
   }
@@ -213,7 +273,7 @@ export class CameraLiveCard extends LitElement {
     }
 
     const token = ++this._connectToken;
-    const sources = [this._config.source, ...this._config.fallbacks];
+    const sources = this.currentSources;
     this.disconnectProvider(false);
     await reserveConnectSlot();
 
@@ -287,12 +347,25 @@ export class CameraLiveCard extends LitElement {
     return this._hass.states[source.entity]?.state ?? "";
   }
 
+  private get currentCamera() {
+    return this._config?.cameras[this._cameraIndex];
+  }
+
   private get currentSource(): CameraSource | undefined {
+    return this.currentSources[this._sourceIndex];
+  }
+
+  private get currentSources(): CameraSource[] {
+    const camera = this.currentCamera;
+    return camera ? [camera.source, ...camera.fallbacks] : [];
+  }
+
+  private get cameraPositionLabel(): string {
     if (!this._config) {
-      return undefined;
+      return "";
     }
 
-    return [this._config.source, ...this._config.fallbacks][this._sourceIndex];
+    return `${this._cameraIndex + 1} / ${this._config.cameras.length}`;
   }
 
   private get videoElement(): HTMLVideoElement | null {
@@ -369,6 +442,23 @@ export class CameraLiveCard extends LitElement {
     }
 
     return "URL";
+  }
+
+  private switchCamera(offset: number): void {
+    if (!this._config || this._config.cameras.length < 2) {
+      return;
+    }
+
+    this._cameraIndex =
+      (this._cameraIndex + offset + this._config.cameras.length) % this._config.cameras.length;
+    this._sourceIndex = 0;
+    this._status = "idle";
+    this._error = "";
+    this._activeSource = "";
+    this._manualPaused = false;
+    this.disconnectProvider();
+    this.requestUpdate();
+    void this.updateComplete.then(() => this.connectFirstAvailable());
   }
 
   private startVisibilityObserver(): void {
@@ -463,6 +553,14 @@ export class CameraLiveCard extends LitElement {
     }
   };
 
+  private readonly showPreviousCamera = (): void => {
+    this.switchCamera(-1);
+  };
+
+  private readonly showNextCamera = (): void => {
+    this.switchCamera(1);
+  };
+
   private readonly enterFullscreen = (): void => {
     const target = this.renderRoot?.querySelector(".frame") as HTMLElement | null;
     void target?.requestFullscreen?.();
@@ -497,7 +595,8 @@ export class CameraLiveCard extends LitElement {
 
     .header,
     .status,
-    .controls {
+    .controls,
+    .navigation {
       position: absolute;
       z-index: 1;
       display: flex;
@@ -538,6 +637,11 @@ export class CameraLiveCard extends LitElement {
       text-overflow: ellipsis;
     }
 
+    .title.spacer {
+      flex: 1 1 auto;
+    }
+
+    .camera-pill,
     .source-pill,
     .entity-state {
       flex: 0 0 auto;
@@ -554,6 +658,7 @@ export class CameraLiveCard extends LitElement {
       text-transform: uppercase;
     }
 
+    .camera-pill ha-icon,
     .source-pill ha-icon,
     .entity-state ha-icon {
       --mdc-icon-size: 15px;
@@ -601,6 +706,25 @@ export class CameraLiveCard extends LitElement {
       padding: 4px;
       border-radius: 8px;
       background: rgb(0 0 0 / 54%);
+    }
+
+    .navigation {
+      inset: 50% 10px auto;
+      justify-content: space-between;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .nav-button {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      background: rgb(0 0 0 / 42%);
+      pointer-events: auto;
+    }
+
+    .nav-button ha-icon {
+      --mdc-icon-size: 28px;
     }
 
     button {

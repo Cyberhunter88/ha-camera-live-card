@@ -16,13 +16,17 @@ describe("normalizeConfig", () => {
     expect(config.autoplay).toBe(true);
     expect(config.controls).toBe("minimal");
     expect(config.pauseWhenHidden).toBe(true);
-    expect(config.fallbacks).toEqual([]);
-    expect(config.source).toEqual({
-      type: "go2rtc",
-      stream: "driveway",
-      url: "/api/go2rtc",
-      mode: "auto",
-    });
+    expect(config.cameras).toEqual([
+      {
+        source: {
+          type: "go2rtc",
+          stream: "driveway",
+          url: "/api/go2rtc",
+          mode: "auto",
+        },
+        fallbacks: [],
+      },
+    ]);
   });
 
   it("keeps fallback order", () => {
@@ -44,7 +48,50 @@ describe("normalizeConfig", () => {
       ],
     });
 
-    expect(config.fallbacks.map((source) => source.type)).toEqual(["entity", "url"]);
+    expect(config.cameras[0].fallbacks.map((source) => source.type)).toEqual(["entity", "url"]);
+  });
+
+  it("normalizes multiple cameras", () => {
+    const config = normalizeConfig({
+      type: "custom:ha-camera-live-card",
+      cameras: [
+        {
+          title: "Front",
+          source: {
+            type: "entity",
+            entity: "camera.front",
+          },
+        },
+        {
+          title: "Garage",
+          source: {
+            type: "url",
+            url: "https://example.local/garage.m3u8",
+          },
+          fallbacks: [
+            {
+              type: "go2rtc",
+              stream: "garage",
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(config.cameras.map((camera) => camera.title)).toEqual(["Front", "Garage"]);
+    expect(config.cameras[0].source).toEqual({
+      type: "entity",
+      entity: "camera.front",
+      format: "hls",
+    });
+    expect(config.cameras[1].fallbacks).toEqual([
+      {
+        type: "go2rtc",
+        stream: "garage",
+        url: "/api/go2rtc",
+        mode: "auto",
+      },
+    ]);
   });
 
   it("rejects missing sources", () => {
@@ -53,6 +100,15 @@ describe("normalizeConfig", () => {
         type: "custom:ha-camera-live-card",
       } as never),
     ).toThrow("Camera source is required.");
+  });
+
+  it("rejects empty cameras", () => {
+    expect(() =>
+      normalizeConfig({
+        type: "custom:ha-camera-live-card",
+        cameras: [],
+      }),
+    ).toThrow("cameras must contain at least one camera.");
   });
 
   it("rejects unsupported source types", () => {

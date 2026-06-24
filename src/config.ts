@@ -1,7 +1,9 @@
 import type {
   CameraLiveCardConfig,
+  CameraEntry,
   CameraSource,
   ControlsMode,
+  NormalizedCameraEntry,
   NormalizedConfig,
   SourceType,
 } from "./types";
@@ -14,12 +16,6 @@ export function normalizeConfig(config: CameraLiveCardConfig): NormalizedConfig 
     throw new Error("Card config is required.");
   }
 
-  if (!config.source) {
-    throw new Error("Camera source is required.");
-  }
-
-  const source = normalizeSource(config.source);
-  const fallbacks = (config.fallbacks ?? []).map(normalizeSource);
   const controls = config.controls ?? "minimal";
 
   if (!CONTROLS.includes(controls)) {
@@ -28,14 +24,29 @@ export function normalizeConfig(config: CameraLiveCardConfig): NormalizedConfig 
 
   return {
     type: config.type,
-    source,
-    fallbacks,
+    cameras: normalizeCameras(config),
     title: config.title,
     aspectRatio: normalizeAspectRatio(config.aspect_ratio ?? "16:9"),
     muted: config.muted ?? true,
     autoplay: config.autoplay ?? true,
     controls,
     pauseWhenHidden: config.pause_when_hidden ?? true,
+  };
+}
+
+export function normalizeCamera(camera: CameraEntry): NormalizedCameraEntry {
+  if (!camera || typeof camera !== "object") {
+    throw new Error("Camera entry must be an object.");
+  }
+
+  if (!camera.source) {
+    throw new Error("Camera source is required.");
+  }
+
+  return {
+    title: camera.title,
+    source: normalizeSource(camera.source),
+    fallbacks: (camera.fallbacks ?? []).map(normalizeSource),
   };
 }
 
@@ -93,6 +104,28 @@ export function describeSource(source: CameraSource): string {
   }
 
   return source.url;
+}
+
+function normalizeCameras(config: CameraLiveCardConfig): NormalizedCameraEntry[] {
+  if (config.cameras !== undefined) {
+    if (!Array.isArray(config.cameras) || config.cameras.length === 0) {
+      throw new Error("cameras must contain at least one camera.");
+    }
+
+    return config.cameras.map(normalizeCamera);
+  }
+
+  if (!config.source) {
+    throw new Error("Camera source is required.");
+  }
+
+  return [
+    {
+      title: config.title,
+      source: normalizeSource(config.source),
+      fallbacks: (config.fallbacks ?? []).map(normalizeSource),
+    },
+  ];
 }
 
 function normalizeAspectRatio(value: string): string {

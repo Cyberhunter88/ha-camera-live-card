@@ -22,10 +22,23 @@ export interface UrlSource {
 
 export type CameraSource = Go2RtcSource | EntitySource | UrlSource;
 
-export interface CameraLiveCardConfig {
-  type: string;
+export interface CameraEntry {
+  title?: string;
   source: CameraSource;
   fallbacks?: CameraSource[];
+}
+
+export interface NormalizedCameraEntry {
+  title?: string;
+  source: CameraSource;
+  fallbacks: CameraSource[];
+}
+
+export interface CameraLiveCardConfig {
+  type: string;
+  source?: CameraSource;
+  fallbacks?: CameraSource[];
+  cameras?: CameraEntry[];
   title?: string;
   aspect_ratio?: string;
   muted?: boolean;
@@ -36,8 +49,7 @@ export interface CameraLiveCardConfig {
 
 export interface NormalizedConfig {
   type: string;
-  source: CameraSource;
-  fallbacks: CameraSource[];
+  cameras: NormalizedCameraEntry[];
   title?: string;
   aspectRatio: string;
   muted: boolean;

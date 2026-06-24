@@ -36,6 +36,65 @@ describe("ha-camera-live-card", () => {
     expect(card.shadowRoot?.textContent).toContain("Front");
   });
 
+  it("hides camera navigation for a single camera", async () => {
+    const card = createCard();
+
+    card.setConfig({
+      type: "custom:ha-camera-live-card",
+      source: {
+        type: "url",
+        url: "https://example.local/front.m3u8",
+      },
+    });
+
+    document.body.append(card);
+    await card.updateComplete;
+
+    expect(card.shadowRoot?.querySelector(".navigation")).toBeNull();
+  });
+
+  it("switches between multiple cameras with carousel arrows", async () => {
+    const card = createCard();
+
+    card.setConfig({
+      type: "custom:ha-camera-live-card",
+      cameras: [
+        {
+          title: "Front",
+          source: {
+            type: "url",
+            url: "https://example.local/front.m3u8",
+          },
+        },
+        {
+          title: "Garage",
+          source: {
+            type: "url",
+            url: "https://example.local/garage.m3u8",
+          },
+        },
+      ],
+    });
+
+    document.body.append(card);
+    await card.updateComplete;
+
+    const video = card.shadowRoot?.querySelector("video");
+    await waitForSrc(video, "https://example.local/front.m3u8");
+    expect(card.shadowRoot?.querySelector(".navigation")).not.toBeNull();
+    expect(card.shadowRoot?.textContent).toContain("1 / 2");
+
+    clickButton(card, "Next camera");
+    await waitForSrc(video, "https://example.local/garage.m3u8");
+    await card.updateComplete;
+    expect(card.shadowRoot?.textContent).toContain("2 / 2");
+
+    clickButton(card, "Previous camera");
+    await waitForSrc(video, "https://example.local/front.m3u8");
+    await card.updateComplete;
+    expect(card.shadowRoot?.textContent).toContain("1 / 2");
+  });
+
   it("falls back from go2rtc to a Home Assistant entity", async () => {
     const card = createCard();
     const hass: HomeAssistant = {
@@ -81,6 +140,65 @@ describe("ha-camera-live-card", () => {
     await waitForSrc(video, "https://ha.local/api/camera_proxy_stream/camera.front");
     expect(video?.getAttribute("src")).toBe("https://ha.local/api/camera_proxy_stream/camera.front");
     expect(card.shadowRoot?.textContent).toContain("Fallback camera.front");
+  });
+
+  it("keeps fallback handling scoped to the active camera", async () => {
+    const card = createCard();
+    const hass: HomeAssistant = {
+      states: {
+        "camera.garage": {
+          entity_id: "camera.garage",
+          state: "streaming",
+          attributes: {},
+        },
+      },
+      callWS: vi.fn().mockResolvedValue({ url: "/api/camera_proxy_stream/camera.garage" }),
+      hassUrl: (path = "") => `https://ha.local${path}`,
+    };
+
+    card.hass = hass;
+    card.setConfig({
+      type: "custom:ha-camera-live-card",
+      cameras: [
+        {
+          title: "Front",
+          source: {
+            type: "url",
+            url: "https://example.local/front.m3u8",
+          },
+        },
+        {
+          title: "Garage",
+          source: {
+            type: "go2rtc",
+            stream: "garage",
+            mode: "webrtc",
+          },
+          fallbacks: [
+            {
+              type: "entity",
+              entity: "camera.garage",
+            },
+          ],
+        },
+      ],
+    });
+
+    document.body.append(card);
+    await card.updateComplete;
+
+    const video = card.shadowRoot?.querySelector("video");
+    await waitForSrc(video, "https://example.local/front.m3u8");
+    expect(hass.callWS).not.toHaveBeenCalled();
+
+    clickButton(card, "Next camera");
+    await waitForSrc(video, "https://ha.local/api/camera_proxy_stream/camera.garage");
+    expect(hass.callWS).toHaveBeenCalledWith({
+      type: "camera/stream",
+      entity_id: "camera.garage",
+      format: "hls",
+    });
+    expect(card.shadowRoot?.textContent).toContain("Fallback camera.garage");
   });
 
   it("cleans up video state when disconnected", async () => {
@@ -130,6 +248,12 @@ describe("ha-camera-live-card", () => {
 
 function createCard(): CameraLiveCard {
   return document.createElement("ha-camera-live-card") as CameraLiveCard;
+}
+
+function clickButton(card: CameraLiveCard, title: string): void {
+  const button = card.shadowRoot?.querySelector(`button[title="${title}"]`) as HTMLButtonElement | null;
+  expect(button).not.toBeNull();
+  button?.click();
 }
 
 async function waitForSrc(video: HTMLVideoElement | null | undefined, src: string): Promise<void> {
